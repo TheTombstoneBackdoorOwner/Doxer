@@ -1,4 +1,5 @@
 local CollectionService = game:GetService("CollectionService")
+local UserInputService = game:GetService("UserInputService")
 local G2L = {}
 
 G2L["ScreenGui_1"] = Instance.new("ScreenGui", game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"))
@@ -14,23 +15,28 @@ G2L["Frame_2"]["BackgroundColor3"] = Color3.fromRGB(139, 139, 139)
 G2L["Frame_2"]["Size"] = UDim2.new(0.27969, 0, 0.24259, 0)
 G2L["Frame_2"]["Position"] = UDim2.new(0.27187, 0, 0.14825, 0)
 G2L["Frame_2"]["BackgroundTransparency"] = 0.25
-G2L["Frame_2"].Draggable = true
 
-G2L["results_3"] = Instance.new("Textbox", G2L["Frame_2"])
+G2L["results_3"] = Instance.new("TextBox", G2L["Frame_2"])
 G2L["results_3"]["BorderSizePixel"] = 0
 G2L["results_3"]["BackgroundColor3"] = Color3.fromRGB(151, 151, 151)
 G2L["results_3"]["Size"] = UDim2.new(0.68715, 0, 0.37778, 0)
 G2L["results_3"]["Name"] = "results"
 G2L["results_3"]["Position"] = UDim2.new(0.02793, 0, 0.5, 0)
+G2L["results_3"]["TextWrapped"] = true
+G2L["results_3"]["TextScaled"] = true
+G2L["results_3"]["Text"] = "Results will appear here"
+G2L["results_3"]["ClearTextOnFocus"] = false
 
 G2L["UICorner_4"] = Instance.new("UICorner", G2L["Frame_2"])
 
-G2L["user_5"] = Instance.new("TextLabel", G2L["Frame_2"])
+G2L["user_5"] = Instance.new("TextBox", G2L["Frame_2"])
 G2L["user_5"]["BorderSizePixel"] = 0
 G2L["user_5"]["BackgroundColor3"] = Color3.fromRGB(151, 151, 151)
 G2L["user_5"]["Size"] = UDim2.new(0.68715, 0, 0.37778, 0)
 G2L["user_5"]["Name"] = "user"
 G2L["user_5"]["Position"] = UDim2.new(0.03911, 0, 0.04444, 0)
+G2L["user_5"]["PlaceholderText"] = "Enter username"
+G2L["user_5"]["Text"] = ""
 
 G2L["Dox_6"] = Instance.new("TextButton", G2L["Frame_2"])
 G2L["Dox_6"]["BorderSizePixel"] = 0
@@ -40,6 +46,44 @@ G2L["Dox_6"]["Text"] = "Dox"
 G2L["Dox_6"]["Name"] = "Dox"
 G2L["Dox_6"]["Position"] = UDim2.new(0.75978, 0, 0.07778, 0)
 
+local function makeDraggable(frame)
+    local dragging = false
+    local dragInput, dragStart, startPos
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+end
+
+makeDraggable(G2L["Frame_2"])
+
 local streets = {"Maple St","Oak Ave","Pine Rd","Elm Blvd","Cedar Ln","Birch Dr","Willow Way","Aspen Ct","Spruce St","Magnolia Ave"}
 local cities = {"New York","Los Angeles","Chicago","Houston","Phoenix","Philadelphia","San Antonio","San Diego","Dallas","San Jose"}
 local states = {"CA","TX","FL","NY","PA","IL","OH","GA","NC","MI"}
@@ -47,6 +91,12 @@ local countries = {"United States","Canada","UK","Australia","Germany","France",
 local isps = {"Comcast","AT&T","Verizon","Spectrum","CenturyLink","Cox","Frontier","Optimum","Mediacom","Windstream"}
 
 G2L["Dox_6"].MouseButton1Click:Connect(function()
+    local username = G2L["user_5"].Text
+    if username == "" then
+        G2L["results_3"].Text = "Please enter a username first"
+        return
+    end
+    
     local randomStreet = streets[math.random(1, #streets)]
     local randomCity = cities[math.random(1, #cities)]
     local randomState = states[math.random(1, #states)]
@@ -55,7 +105,8 @@ G2L["Dox_6"].MouseButton1Click:Connect(function()
     local randomZip = tostring(math.random(10000, 99999))
     local randomIP = math.random(1,255).."."..math.random(1,255).."."..math.random(1,255).."."..math.random(1,255)
     
-    local fakeInfo = "IP: "..randomIP.."\n"
+    local fakeInfo = "Target: "..username.."\n"
+    fakeInfo = fakeInfo.."IP: "..randomIP.."\n"
     fakeInfo = fakeInfo.."ISP: "..randomISP.."\n"
     fakeInfo = fakeInfo.."Location: "..randomStreet..", "..randomCity..", "..randomState.." "..randomZip.."\n"
     fakeInfo = fakeInfo.."Country: "..randomCountry.."\n"
