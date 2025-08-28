@@ -14,6 +14,7 @@ G2L["Frame_2"]["BackgroundColor3"] = Color3.fromRGB(139, 139, 139)
 G2L["Frame_2"]["Size"] = UDim2.new(0.27969, 0, 0.24259, 0)
 G2L["Frame_2"]["Position"] = UDim2.new(0.27187, 0, 0.14825, 0)
 G2L["Frame_2"]["BackgroundTransparency"] = 0.25
+G2L["Frame_2"].Draggable = true
 
 G2L["results_3"] = Instance.new("Textbox", G2L["Frame_2"])
 G2L["results_3"]["BorderSizePixel"] = 0
